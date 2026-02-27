@@ -31,7 +31,7 @@
   .header-btn.active { background: rgba(0,102,102,0.1); border-color: var(--teal); }
   #start-over { color: rgba(0,102,102,0.5); display: none; }
   #messages { flex: 1; overflow-y: auto; padding: 20px 20px 160px; max-width: 720px; width: 100%; margin: 0 auto; position: relative; z-index: 1; }
-  #privacy-note { text-align: center; margin-bottom: 20px; padding: 8px 14px; background: rgba(0,102,102,0.04); border: 1px solid var(--border); border-radius: 8px; font-size: 11px; color: rgba(0,102,102,0.5); }
+  #privacy-note { text-align: center; margin-bottom: 20px; padding: 8px 14px; background: rgba(0,102,102,0.04); border: 1px solid var(--border); border-radius: 8px; font-size: 11px; color: rgba(0,102,102,0.8); }
   .msg-row { display: flex; margin-bottom: 16px; opacity: 0; transform: translateY(6px); transition: opacity 0.35s ease, transform 0.35s ease; }
   .msg-row.visible { opacity: 1; transform: none; }
   .msg-row.user { justify-content: flex-end; }
@@ -60,20 +60,20 @@
   body.high-contrast #input-area { background: white; border-top: 1px solid #000; }
   #input-inner { max-width: 720px; margin: 0 auto; }
   #chips-area { margin-bottom: 12px; }
-  #chips-label { font-size: 11px; color: rgba(0,102,102,0.5); margin-bottom: 8px; letter-spacing: 0.05em; }
+  #chips-label { font-size: 11px; color: rgba(0,102,102,0.8); margin-bottom: 8px; letter-spacing: 0.05em; }
   #chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .chip { background: rgba(255,255,255,0.85); border: 1px solid var(--border); border-radius: 24px; padding: 8px 16px; cursor: pointer; font-size: 13px; color: var(--text); font-family: Georgia, serif; display: flex; align-items: center; gap: 7px; transition: all 0.18s; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,102,102,0.06); }
-  .chip:hover { background: rgba(0,102,102,0.1); border-color: rgba(0,102,102,0.4); }
+  .chip:hover { background: rgba(0,102,102,0.1); border-color: rgba(0,102,102,0.7); }
   .chip-emoji { font-size: 15px; }
   #input-row { display: flex; gap: 10px; align-items: flex-end; background: rgba(255,255,255,0.85); border: 1px solid rgba(0,102,102,0.2); border-radius: 16px; padding: 10px 12px 10px 16px; }
   body.high-contrast #input-row { border-color: #000; }
   #msg-input { flex: 1; background: transparent; border: none; outline: none; resize: none; color: var(--text); font-size: var(--font-size); line-height: 1.6; font-family: Georgia, serif; min-height: 24px; max-height: 120px; caret-color: var(--teal); overflow-y: hidden; }
-  #msg-input::placeholder { color: rgba(0,102,102,0.35); }
+  #msg-input::placeholder { color: rgba(0,102,102,0.6); }
   #send-btn { width: 38px; height: 38px; border-radius: 10px; border: none; background: rgba(0,102,102,0.08); cursor: default; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
   #send-btn.ready { background: linear-gradient(135deg, #006666, #008080); cursor: pointer; box-shadow: 0 4px 14px rgba(0,102,102,0.3); }
   #send-btn svg path { stroke: rgba(0,102,102,0.25); }
   #send-btn.ready svg path { stroke: #FDF8CE; }
-  #input-footer { text-align: center; margin-top: 6px; font-size: 11px; color: rgba(0,102,102,0.4); letter-spacing: 0.03em; }
+  #input-footer { text-align: center; margin-top: 6px; font-size: 11px; color: rgba(0,102,102,0.7); letter-spacing: 0.03em; }
   ::-webkit-scrollbar { width: 3px; }
   ::-webkit-scrollbar-thumb { background: rgba(0,102,102,0.2); border-radius: 2px; }
 </style>
