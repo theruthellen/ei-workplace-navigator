@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workplace Navigator — Exceptional Individuals</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --teal: #006666; --teal-mid: #008080; --bg: #FDF8CE;
+    --text: #1a3333; --border: rgba(0,102,102,0.15);
+    --coral: #B34700; --font-size: 14.5px;
+  }
+  body { font-family: Georgia, serif; background: var(--bg); min-height: 100vh; display: flex; flex-direction: column; color: var(--text); }
+  body.high-contrast { --bg: #ffffff; --text: #000000; --teal: #004444; --border: rgba(0,0,0,0.3); }
+  body.high-contrast #app { background: #ffffff; }
+  #bg-glow { position: fixed; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(ellipse 55% 45% at 15% 15%, rgba(0,102,102,0.06) 0%, transparent 65%), radial-gradient(ellipse 45% 35% at 85% 80%, rgba(0,128,128,0.04) 0%, transparent 60%); }
+  body.high-contrast #bg-glow { display: none; }
+  #header { position: sticky; top: 0; z-index: 10; background: rgba(253,248,206,0.97); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,102,102,0.2); padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  body.high-contrast #header { background: white; border-bottom: 1px solid #000; }
+  #header-left { display: flex; align-items: center; gap: 12px; }
+  #ei-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #006666, #008080); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #FDF8CE; box-shadow: 0 0 14px rgba(0,102,102,0.2); flex-shrink: 0; }
+  #header-title { font-size: 15px; font-weight: 700; color: var(--teal); letter-spacing: -0.2px; }
+  #header-sub { font-size: 11px; color: rgba(0,102,102,0.55); }
+  #header-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .font-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(0,102,102,0.2); background: transparent; color: var(--teal); cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .font-btn.active { border-color: var(--teal); background: rgba(0,102,102,0.1); }
+  .ctrl-divider { width: 1px; height: 20px; background: rgba(0,102,102,0.15); margin: 0 4px; }
+  .header-btn { padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600; font-family: Georgia, serif; border: 1px solid rgba(0,102,102,0.2); background: transparent; color: var(--teal); transition: all 0.15s; }
+  .header-btn:hover { background: rgba(0,102,102,0.08); }
+  .header-btn.active { background: rgba(0,102,102,0.1); border-color: var(--teal); }
+  #start-over { color: rgba(0,102,102,0.5); display: none; }
+  #messages { flex: 1; overflow-y: auto; padding: 20px 20px 160px; max-width: 720px; width: 100%; margin: 0 auto; position: relative; z-index: 1; }
+  #privacy-note { text-align: center; margin-bottom: 20px; padding: 8px 14px; background: rgba(0,102,102,0.04); border: 1px solid var(--border); border-radius: 8px; font-size: 11px; color: rgba(0,102,102,0.5); }
+  .msg-row { display: flex; margin-bottom: 16px; opacity: 0; transform: translateY(6px); transition: opacity 0.35s ease, transform 0.35s ease; }
+  .msg-row.visible { opacity: 1; transform: none; }
+  .msg-row.user { justify-content: flex-end; }
+  .msg-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #006666, #008080); flex-shrink: 0; margin-right: 10px; margin-top: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #FDF8CE; box-shadow: 0 2px 8px rgba(0,102,102,0.2); }
+  .msg-bubble { max-width: 78%; padding: 13px 17px; line-height: 1.85; white-space: pre-wrap; font-size: var(--font-size); font-family: Georgia, serif; }
+  .msg-bubble.user { background: linear-gradient(135deg, #006666, #008080); color: #FDF8CE; border-radius: 18px 18px 4px 18px; box-shadow: 0 2px 12px rgba(0,102,102,0.2); }
+  .msg-bubble.assistant { background: rgba(255,255,255,0.75); color: var(--text); border: 1px solid var(--border); border-radius: 4px 18px 18px 18px; box-shadow: 0 1px 4px rgba(0,102,102,0.06); }
+  .script-card { margin: 4px 0 20px 40px; background: rgba(255,255,255,0.9); border: 2px solid rgba(0,102,102,0.25); border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,102,102,0.08); }
+  .script-header { padding: 10px 16px; background: rgba(0,102,102,0.06); border-bottom: 1px solid rgba(0,102,102,0.12); display: flex; justify-content: space-between; align-items: center; }
+  .script-label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--teal); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .script-actions { display: flex; gap: 8px; }
+  .script-btn { background: white; border: 1px solid rgba(0,102,102,0.3); border-radius: 8px; padding: 5px 14px; color: var(--teal); font-size: 12px; cursor: pointer; font-weight: 600; font-family: Georgia, serif; transition: all 0.2s; }
+  .script-btn:hover { background: rgba(0,102,102,0.06); }
+  .script-btn.copied { background: rgba(0,102,102,0.12); }
+  .script-body { padding: 16px 18px; font-size: var(--font-size); line-height: 1.9; color: var(--text); white-space: pre-wrap; font-family: Georgia, serif; }
+  #typing-indicator { display: none; }
+  #typing-indicator.visible { display: flex; margin-bottom: 16px; }
+  .dot-bubble { background: rgba(255,255,255,0.75); border: 1px solid var(--border); border-radius: 4px 18px 18px 18px; padding: 14px 18px; display: flex; gap: 5px; align-items: center; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; animation: pulse 1.2s ease-in-out infinite; }
+  .dot:nth-child(1) { background: rgba(0,102,102,0.3); animation-delay: 0s; }
+  .dot:nth-child(2) { background: rgba(0,102,102,0.55); animation-delay: 0.18s; }
+  .dot:nth-child(3) { background: rgba(0,102,102,0.8); animation-delay: 0.36s; }
+  @keyframes pulse { 0%, 60%, 100% { transform: translateY(0); opacity: 0.35; } 30% { transform: translateY(-5px); opacity: 1; } }
+  #error-msg { text-align: center; color: var(--coral); font-size: 13px; padding: 8px 0; display: none; }
+  #input-area { position: fixed; bottom: 0; left: 0; right: 0; z-index: 10; background: rgba(253,248,206,0.98); backdrop-filter: blur(24px); border-top: 1px solid rgba(0,102,102,0.15); padding: 12px 20px 16px; }
+  body.high-contrast #input-area { background: white; border-top: 1px solid #000; }
+  #input-inner { max-width: 720px; margin: 0 auto; }
+  #chips-area { margin-bottom: 12px; }
+  #chips-label { font-size: 11px; color: rgba(0,102,102,0.5); margin-bottom: 8px; letter-spacing: 0.05em; }
+  #chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: rgba(255,255,255,0.85); border: 1px solid var(--border); border-radius: 24px; padding: 8px 16px; cursor: pointer; font-size: 13px; color: var(--text); font-family: Georgia, serif; display: flex; align-items: center; gap: 7px; transition: all 0.18s; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,102,102,0.06); }
+  .chip:hover { background: rgba(0,102,102,0.1); border-color: rgba(0,102,102,0.4); }
+  .chip-emoji { font-size: 15px; }
+  #input-row { display: flex; gap: 10px; align-items: flex-end; background: rgba(255,255,255,0.85); border: 1px solid rgba(0,102,102,0.2); border-radius: 16px; padding: 10px 12px 10px 16px; }
+  body.high-contrast #input-row { border-color: #000; }
+  #msg-input { flex: 1; background: transparent; border: none; outline: none; resize: none; color: var(--text); font-size: var(--font-size); line-height: 1.6; font-family: Georgia, serif; min-height: 24px; max-height: 120px; caret-color: var(--teal); overflow-y: hidden; }
+  #msg-input::placeholder { color: rgba(0,102,102,0.35); }
+  #send-btn { width: 38px; height: 38px; border-radius: 10px; border: none; background: rgba(0,102,102,0.08); cursor: default; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+  #send-btn.ready { background: linear-gradient(135deg, #006666, #008080); cursor: pointer; box-shadow: 0 4px 14px rgba(0,102,102,0.3); }
+  #send-btn svg path { stroke: rgba(0,102,102,0.25); }
+  #send-btn.ready svg path { stroke: #FDF8CE; }
+  #input-footer { text-align: center; margin-top: 6px; font-size: 11px; color: rgba(0,102,102,0.4); letter-spacing: 0.03em; }
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,102,102,0.2); border-radius: 2px; }
+</style>
+</head>
+<body>
+<div id="bg-glow"></div>
+<div id="header">
+  <div id="header-left">
+    <div id="ei-avatar">EI</div>
+    <div>
+      <div id="header-title">Workplace Navigator</div>
+      <div id="header-sub">by Exceptional Individuals</div>
+    </div>
+  </div>
+  <div id="header-controls">
+    <span style="font-size:11px;color:rgba(0,102,102,0.5);margin-right:2px">Text</span>
+    <button class="font-btn" data-size="13" style="font-size:10px">A</button>
+    <button class="font-btn active" data-size="14.5" style="font-size:12px">A</button>
+    <button class="font-btn" data-size="17" style="font-size:14px">A</button>
+    <div class="ctrl-divider"></div>
+    <button class="header-btn" id="contrast-btn">High contrast</button>
+    <button class="header-btn" id="start-over">Start over</button>
+  </div>
+</div>
+<div id="messages">
+  <div id="privacy-note">🔒 This conversation is private. Nothing is saved between sessions.</div>
+  <div id="msg-list"></div>
+  <div id="typing-indicator">
+    <div class="msg-avatar">EI</div>
+    <div class="dot-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>
+  <div id="error-msg"></div>
+  <div id="bottom-anchor"></div>
+</div>
+<div id="input-area">
+  <div id="input-inner">
+    <div id="chips-area">
+      <div id="chips-label">WHAT CAME UP FOR YOU IN THE SESSION?</div>
+      <div id="chips"></div>
+    </div>
+    <div id="input-row">
+      <textarea id="msg-input" rows="1" placeholder="Or type here — there's no wrong answer..."></textarea>
+      <button id="send-btn" aria-label="Send">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+          <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+    <div id="input-footer">Enter to send · Shift+Enter for new line · exceptionalindividuals.com</div>
+  </div>
+</div>
+<script>
+const SYSTEM_PROMPT = `You are a warm, direct companion for neurodivergent people navigating the workplace. You work with Exceptional Individuals — a neurodivergent-led organisation. Core belief: neurodivergent brains are not broken. Workplaces were not designed for them. The environment needs to flex, not the person.
+
+## The most important rule
+Move, don't probe. Read what someone writes, say something useful, move toward action. No more than one question per response. Within 2 exchanges, name what you think is happening and offer something concrete. A good companion reads fast and moves faster.
+
+## Neuroaffirming language — always, without exception
+- Never use deficit framing. There is no "problem with" someone's brain — there is a mismatch between their brain and an environment not designed for it.
+- Never describe neurodivergent traits as symptoms, deficits, or things to overcome.
+- Never imply someone needs to be fixed, improved, or managed. They need their environment to flex.
+- Never use "despite" framing. Never use "high/low functioning" language.
+- Never frame adjustments as accommodations the employer is generously providing. They are legal rights under the Equality Act 2010.
+- Always locate the problem in the environment, system, or design — not the person.
+- When someone is hard on themselves, name what you're hearing and reframe it: "What you're describing sounds like an environment asking you to work against your brain."
+- Use language like: "your brain works differently here", "the environment isn't designed for how you process", "this is a design mismatch not a personal failing", "your energy is selective not inconsistent", "different, not deficient."
+- Never reinforce self-blame. If someone says "I just need to try harder" — gently reframe: where is this actually coming from?
+
+## Where people are in their journey — read fast and meet them there
+
+**Not yet named:** Feels the cost of work but doesn't have words for it yet.
+→ Be a mirror. Reflect back what you're hearing. Name what it might be without diagnosing. Show it's a design mismatch, not a character flaw. Move toward what the environment needs to change.
+
+**Named but not claimed:** Has words for what's hard but doesn't know they're entitled to anything.
+→ Be a rights translator. Tell them what they're legally entitled to under the Equality Act 2010. Frame the ask as normal and legitimate.
+
+**Knows their rights, unsure if it's safe:** Understands the framework but unsure if it's safe at their specific workplace.
+→ Help them think it through — don't decide for them. Surface relevant considerations: manager track record, HR culture, employment stage. Honest about risk without inflating it.
+
+**Ready but not moving:** Knows what they need, thinks it's probably safe, but shame or RSD is in the way.
+→ Name the shame or RSD layer briefly and specifically — then move to action. RSD makes the fear feel like evidence. It isn't. Help them distinguish what they're actually risking from what it feels like. Then offer the script.
+
+## How to operate
+- Offer before you ask. If you can see what someone needs, offer it.
+- One clarifying question maximum per response.
+- Never ask someone to justify their need. Needs don't require proof.
+- Never assume a neurotype — let them tell you what they know about themselves.
+- Bias toward action. Warm and fast are not in tension.
+- Write in conversational prose. No bullet lists unless they ask.
+- Never say "I understand" as filler. If you empathise, name exactly what you're empathising with.
+
+## Scripts you can generate
+When someone is ready, generate a neuroaffirming script for any of these:
+1. Request an adjustment without disclosing
+2. Request an adjustment with disclosure
+3. Follow up when an agreed adjustment hasn't happened
+4. Push back on masking pressure
+5. Ask for processing time when put on the spot
+6. Formal disclosure to HR
+7. Flag struggling before burnout
+
+When generating: personalise with what they've told you. Write in first person as if they wrote it. Strength-based, rights-based, no apology, no minimising, no deficit framing. Wrap ONLY the script text in [SCRIPT]...[/SCRIPT] tags. Everything else stays as conversation.
+
+After any script, briefly note the neuroaffirming choices made — 2 sentences, written to the person.
+
+## When to signpost to Exceptional Individuals
+Signpost naturally — as a genuine next step, not a sales pitch. Never lead with ATW unless someone asks.
+
+**Workplace Needs Assessment** — when someone doesn't yet know what adjustments would help, or wants a proper map of their environment and strengths.
+**1:1 Neurodiversity Coaching** — when the situation is complex or ongoing, or someone is navigating burnout or a difficult relationship at work.
+**Team Workshops / Workplace Reviews** — when the problem is cultural or systemic, not individual.
+
+Keep signposting to one sentence, warm, framed as "if you want to go further." Contact: exceptionalindividuals.com or admin@exceptionalindividuals.com. Never mention ATW unprompted.
+
+## The resource pack — know it, work with it
+The person you're talking to has the "Navigating Neurodiversity and the Workplace" resource pack. It has seven tools:
+- Tool 1: S.H.I.F.T. Framework reference card
+- Tool 2: My Spiky Profile — self-discovery worksheet with S.P.I.K.E.
+- Tool 3: My Energy Map — understanding capacity and warning signs across the week
+- Tool 4: The D.A.R.E. Disclosure Planner — structured thinking through disclosure
+- Tool 5: My Adjustments Wish List — ticking what applies, naming top three, with language to describe each
+- Tool 6: The S.M.A.R.T. Environment Audit — evaluating their actual workplace
+- Tool 7: Scripts That Work — five ready-made scripts for real conversations
+
+## The five frameworks from the session
+S.H.I.F.T. — Social model / Honour your brain / Inform disclosure / Frame adjustments as rights / Take what works today.
+S.M.A.R.T. Environment — Sensory / Meeting design / Accessibility / Routine / Time flexibility.
+D.E.P. (Dr Damian Milton, 2012) — Communication difficulty is mutual, not one-sided.
+S.P.I.K.E. — Strengths / Patterns / Interests / Knowledge / Energy (selective, not inconsistent).
+D.A.R.E. — Do I trust? / Are adjustments needed? / Risk? / Exit? Walk through one question at a time.
+
+## End of every conversation
+Always close with something concrete: a script, a decision, a single sentence written, a named need, or a next step.`;
+
+const WELCOME = `Welcome — and well done for getting here, whether that's today or a few days later.
+
+You attended Navigating Neurodiversity and the Workplace, and you have the resource pack to work through in your own time. This is the third piece — where reflection becomes action.
+
+If you've been working through the pack, bring whatever you've been sitting with. Tool 4 (the D.A.R.E. Disclosure Planner) and Tool 5 (your Adjustments Wish List) are particularly good starting points. If you've named what you need, this is where we turn that into language you can actually use.
+
+If you haven't opened the pack yet — that's fine too. Start here. Start with whatever is most alive for you right now.
+
+What's on your mind?`;
+
+const PROMPTS = [
+  { emoji: "💡", label: "I know what adjustment I need", text: "I know what adjustment would genuinely change how I experience work — I just need help asking for it." },
+  { emoji: "🌫️", label: "I can't quite name what I need", text: "Something isn't working but I can't quite name what I need. The gap my workplace doesn't see is hard to put into words." },
+  { emoji: "🎭", label: "I think I've been masking too long", text: "I think I've been masking for so long I'm not sure what I actually need anymore. I'm exhausted in a way that's hard to explain." },
+  { emoji: "🔓", label: "I'm thinking about disclosure", text: "I'm trying to decide whether to disclose at work. I want to D.A.R.E. through it — do I trust this, what do I actually need, what's the real risk?" },
+  { emoji: "📬", label: "An adjustment was agreed but nothing changed", text: "An adjustment was agreed but nothing has actually changed. I need to follow up without it becoming a confrontation." },
+  { emoji: "🏗️", label: "My environment isn't working for my brain", text: "The way my workplace is set up isn't designed for how I process. It's not me that needs to change — the environment does. I need help naming what needs to flex and how to ask for it." },
+  { emoji: "🌱", label: "I want to remember what I'm capable of", text: "After today's session I want to hold onto something about myself — not just about neurodiversity, about me. Can you help me figure out what that is and what to do with it?" },
+];
+
+let messages = [{ role: "user", content: "START" }];
+let loading = false;
+let fontSize = 14.5;
+let highContrast = false;
+
+const msgList = document.getElementById("msg-list");
+const typingIndicator = document.getElementById("typing-indicator");
+const errorMsg = document.getElementById("error-msg");
+const msgInput = document.getElementById("msg-input");
+const sendBtn = document.getElementById("send-btn");
+const chipsArea = document.getElementById("chips-area");
+const chipsContainer = document.getElementById("chips");
+const startOverBtn = document.getElementById("start-over");
+const contrastBtn = document.getElementById("contrast-btn");
+const messagesEl = document.getElementById("messages");
+
+PROMPTS.forEach(p => {
+  const chip = document.createElement("button");
+  chip.className = "chip";
+  chip.innerHTML = `<span class="chip-emoji">${p.emoji}</span><span>${p.label}</span>`;
+  chip.addEventListener("click", () => sendMessage(p.text));
+  chipsContainer.appendChild(chip);
+});
+
+document.querySelectorAll(".font-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    fontSize = parseFloat(btn.dataset.size);
+    document.documentElement.style.setProperty("--font-size", fontSize + "px");
+    document.querySelectorAll(".font-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+  });
+});
+
+contrastBtn.addEventListener("click", () => {
+  highContrast = !highContrast;
+  document.body.classList.toggle("high-contrast", highContrast);
+  contrastBtn.classList.toggle("active", highContrast);
+});
+
+startOverBtn.addEventListener("click", () => {
+  messages = [{ role: "user", content: "START" }];
+  msgList.innerHTML = "";
+  errorMsg.style.display = "none";
+  chipsArea.style.display = "block";
+  startOverBtn.style.display = "none";
+  renderWelcome();
+});
+
+msgInput.addEventListener("input", () => {
+  msgInput.style.height = "auto";
+  msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + "px";
+  updateSendBtn();
+});
+
+msgInput.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+sendBtn.addEventListener("click", () => sendMessage());
+
+function updateSendBtn() {
+  const ready = msgInput.value.trim().length > 0 && !loading;
+  sendBtn.classList.toggle("ready", ready);
+  sendBtn.disabled = !ready;
+}
+
+function scrollBottom() {
+  setTimeout(() => messagesEl.scrollTop = messagesEl.scrollHeight, 50);
+}
+
+function extractScript(text) {
+  const m = text.match(/\[SCRIPT\]([\s\S]*?)\[\/SCRIPT\]/);
+  return m ? m[1].trim() : null;
+}
+
+function cleanText(text) {
+  return text.replace(/\[SCRIPT\][\s\S]*?\[\/SCRIPT\]/g, "").trim();
+}
+
+function renderMessage(role, content, animate) {
+  const row = document.createElement("div");
+  row.className = "msg-row " + role;
+  if (!animate) row.classList.add("visible");
+
+  if (role === "assistant") {
+    const avatar = document.createElement("div");
+    avatar.className = "msg-avatar";
+    avatar.textContent = "EI";
+    row.appendChild(avatar);
+  }
+
+  const bubble = document.createElement("div");
+  bubble.className = "msg-bubble " + role;
+  bubble.textContent = content;
+  row.appendChild(bubble);
+  msgList.appendChild(row);
+
+  if (animate) {
+    requestAnimationFrame(() => setTimeout(() => row.classList.add("visible"), 60));
+  }
+}
+
+function renderScriptCard(script) {
+  const card = document.createElement("div");
+  card.className = "script-card";
+  card.innerHTML = `
+    <div class="script-header">
+      <div class="script-label"><span>✦</span><span>Neuroaffirming Script</span></div>
+      <div class="script-actions">
+        <button class="script-btn copy-btn">Copy</button>
+        <button class="script-btn email-btn">Open in email ↗</button>
+      </div>
+    </div>
+    <div class="script-body"></div>
+  `;
+  card.querySelector(".script-body").textContent = script;
+  card.querySelector(".copy-btn").addEventListener("click", function() {
+    navigator.clipboard.writeText(script);
+    this.textContent = "✓ Copied";
+    this.classList.add("copied");
+    setTimeout(() => { this.textContent = "Copy"; this.classList.remove("copied"); }, 2200);
+  });
+  card.querySelector(".email-btn").addEventListener("click", () => {
+    const a = document.createElement("a");
+    a.href = "mailto:?body=" + encodeURIComponent(script);
+    a.click();
+  });
+  msgList.appendChild(card);
+}
+
+function renderWelcome() {
+  renderMessage("assistant", WELCOME, true);
+  scrollBottom();
+}
+
+async function sendMessage(text) {
+  const msg = (text || msgInput.value).trim();
+  if (!msg || loading) return;
+
+  msgInput.value = "";
+  msgInput.style.height = "24px";
+  errorMsg.style.display = "none";
+  updateSendBtn();
+  chipsArea.style.display = "none";
+  startOverBtn.style.display = "block";
+
+  messages.push({ role: "user", content: msg });
+  renderMessage("user", msg, false);
+  scrollBottom();
+
+  loading = true;
+  updateSendBtn();
+  typingIndicator.classList.add("visible");
+  scrollBottom();
+
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ system: SYSTEM_PROMPT, messages: messages }),
+    });
+
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Request failed");
+
+    const raw = json.content || "";
+    const script = extractScript(raw);
+    const clean = cleanText(raw);
+
+    messages.push({ role: "assistant", content: clean });
+    typingIndicator.classList.remove("visible");
+    renderMessage("assistant", clean, true);
+    if (script) renderScriptCard(script);
+    scrollBottom();
+
+  } catch (e) {
+    typingIndicator.classList.remove("visible");
+    errorMsg.textContent = "Something went wrong — please try again.";
+    errorMsg.style.display = "block";
+    console.error(e);
+  } finally {
+    loading = false;
+    updateSendBtn();
+    setTimeout(() => msgInput.focus(), 80);
+  }
+}
+
+renderWelcome();
+</script>
+</body>
+</html>
